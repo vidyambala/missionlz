@@ -28,46 +28,45 @@ elif [[ ! "${PGM}" == "mlz_tf_setup.sh" ]];then
     done
 fi
 
-# generate names
-. "${BASH_SOURCE%/*}"/generate_names.sh "${enclave_name}"
-
 # Configure Azure Security Center
 for sub in "${subs[@]}"
 do
+    # generate names
+    . "${BASH_SOURCE%/*}"/generate_names.sh "${enclave_name}" "${sub}"
+
     ascAutoProv=$(az security auto-provisioning-setting show \
         --subscription "${sub}" \
         --name "default" \
         --query autoProvision \
         --output tsv \
         --only-show-errors)
+
     if [[ ${ascAutoProv} == "Off" ]]; then
-        lawsRgName=${mlz_laws-rg_name}
-        safeSubId="${sub//-}"
 
         # Create Resource Group for Log Analytics workspace
-        if [[ -z $(az group show --name "${mlz_laws-rg_name}" --subscription "${sub}" --query name --output tsv) ]]; then
-            echo Resource Group does not exist...creating resource group "${lawsRgName}"
+        if [[ -z $(az group show --name "${mlz_laws_rg_name}" --subscription "${sub}" --query name --output tsv) ]]; then
+            echo "Resource Group does not exist...creating resource group ${mlz_laws_rg_name}"
             az group create \
                 --subscription "${sub}" \
                 --location "${location}" \
-                --name "${mlz_laws-rg_name}"
+                --name "${mlz_laws_rg_name}"
         else
-            echo Resource Group "${mlz_laws-rg_name}" already exists. Verify desired ASC configuration and re-run script
+            echo Resource Group "${mlz_laws_rg_name}" already exists. Verify desired ASC configuration and re-run script
             exit 1
         fi
 
         # Create Log Analytics workspace
-        if [[ -z $(az monitor log-analytics workspace show --resource-group "${mlz_laws-rg_name}" --workspace-name "${mlz_laws_prefix}-${safeSubId}" --subscription "${sub}") ]]; then
-            echo Log Analytics workspace does not exist...creating workspace "${mlz_laws_prefix}-${safeSubId}"
+        if [[ -z $(az monitor log-analytics workspace show --resource-group "${mlz_laws_rg_name}" --workspace-name "${mlz_laws_workspacename}" --subscription "${sub}") ]]; then
+            echo Log Analytics workspace does not exist...creating workspace "${mlz_laws_workspacename}"
             lawsId=$(az monitor log-analytics workspace create \
-            --resource-group "${mlz_laws-rg_name}" \
-            --workspace-name "${mlz_laws_prefix}-${safeSubId}" \
+            --resource-group "${mlz_laws_rg_name}" \
+            --workspace-name "${mlz_laws_workspace_name}" \
             --location "${location}" \
             --subscription "${sub}" \
             --query id \
             --output tsv)
         else
-            echo Log Analytics workspace "${mlz_laws_prefix}-${safeSubId}" already exists. Verify desired ASC configuration and re-run script
+            echo Log Analytics workspace "${mlz_laws_workspacename}" already exists. Verify desired ASC configuration and re-run script
             exit 1
         fi
 
@@ -91,31 +90,37 @@ do
 
         # Create default setting for ASC Log Analytics workspace
         if [[ -z $(az security workspace-setting show --name default --subscription "${sub}" --only-show-errors) ]]; then
-            echo ASC Log Analytics workspace setting does not exist...creating default setting
-            echo "This script will attempt to create the setting for 30 minutes and then timeout if the setting has not been created"
-            echo Log Analytics ID = "${lawsId}"
+
+            sleep_time_in_seconds=30
+            max_wait_in_minutes=30
+            max_wait_in_seconds=($max_wait_in_minutes * 60)
+            max_retries=($max_wait_in_seconds / $sleep_time_in_seconds)
+
+            echo "ASC Log Analytics workspace setting does not exist...creating default setting"
+            echo "This script will attempt to create the setting for ${max_wait_in_minutes} minutes and then timeout if the setting has not been created"
+            echo "Log Analytics ID = ${lawsId}"
+
+            count=0
+
             az security workspace-setting create \
                 --name "default" \
                 --target-workspace "${lawsId}" \
                 --subscription "${sub}"
-            count=0
+
             while [ -z "$(az security workspace-setting show --name default --subscription  "${sub}" --query workspaceId --output tsv --only-show-errors)" ]
             do
-                if [[ ${count} -gt 0 ]] && [[ $(( count%2 )) -eq 0 ]];then
-                    clear
-                    echo Waiting for ASC work space setting to finish provisioning
-                    elapsed_time=$(( count*30/60 ))
-                    echo Elapsed time = "${elapsed_time}" minutes
-                fi
-                sleep 30
                 ((count++))
-                if [[ ${count} -eq 60 ]];then
+                echo "Waiting for ASC workspace to finish provisioning (${count}/${max_retries})"
+                echo "Trying again in ${sleep_time_in_seconds}..."
+                sleep $sleep_time_in_seconds
+
+                if [[ $count -eq $max_retries ]];then
                     echo Provisioning the workspace setting has exceeded 30 minutes. Investigate and re-run script
                     exit 1
-                fi 
+                fi
             done
         else
-            echo ASC already has a \"default\" Log Analytics workspace configuration. Verify desired ASC configuration and re-run script
+            echo "ASC already has a \"default\" Log Analytics workspace configuration. Verify desired ASC configuration and re-run script"
             exit 1
         fi
 
@@ -126,7 +131,7 @@ do
             --name "default" \
             --only-show-errors
     else
-        echo ASC auto-provisioning is already set to \"On\". Verify desired ASC configuration and re-run script
+        echo "ASC auto-provisioning is already set to \"On\". Verify desired ASC configuration and re-run script"
         exit 1
     fi
 done
