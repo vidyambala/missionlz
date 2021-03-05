@@ -91,6 +91,11 @@ do
         # Create default setting for ASC Log Analytics workspace
         if [[ -z $(az security workspace-setting show --name default --subscription "${sub}" --only-show-errors) ]]; then
 
+            sleep_time_in_seconds=30
+            max_wait_in_minutes=30
+            max_wait_in_seconds=($max_wait_in_minutes * 60)
+            max_retries=($max_wait_in_seconds / $sleep_time_in_seconds)
+
             echo "ASC Log Analytics workspace setting does not exist...creating default setting"
             echo "This script will attempt to create the setting for ${max_wait_in_minutes} minutes and then timeout if the setting has not been created"
             echo "Log Analytics ID = ${lawsId}"
@@ -99,11 +104,6 @@ do
                 --name "default" \
                 --target-workspace "${lawsId}" \
                 --subscription "${sub}"
-
-            sleep_time_in_seconds=30
-            max_wait_in_minutes=30
-            max_wait_in_seconds=($max_wait_in_minutes * 60)
-            max_retries=($max_wait_in_seconds / $sleep_time_in_seconds)
 
             count=0
 
