@@ -111,7 +111,7 @@ do
             do
                 ((count++))
                 echo "Waiting for ASC workspace to finish provisioning (${count}/${max_retries})"
-                echo "Trying again in ${sleep_time_in_seconds}..."
+                echo "Trying again in ${sleep_time_in_seconds} seconds..."
                 sleep $sleep_time_in_seconds
 
                 if [[ $count -eq $max_retries ]];then
