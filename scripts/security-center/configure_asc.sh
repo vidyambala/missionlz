@@ -115,7 +115,7 @@ do
                 sleep $sleep_time_in_seconds
 
                 if [[ $count -eq $max_retries ]];then
-                    echo Provisioning the workspace setting has exceeded 30 minutes. Investigate and re-run script
+                    echo "Provisioning the workspace setting has exceeded ${max_wait_in_minutes} minutes. Investigate and re-run script."
                     exit 1
                 fi
             done
