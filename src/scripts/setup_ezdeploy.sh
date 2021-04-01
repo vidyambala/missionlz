@@ -103,18 +103,19 @@ if [[ $docker_strategy != "local" ]]; then
 
   . "${BASH_SOURCE%/*}/ezdeploy_docker.sh" "$docker_strategy"
 
-  docker tag lzfront:latest "${mlz_acr_name}.azurecr.io/lzfront:latest"
+  registryEndPoint=$(az acr show-endpoints --name ${mlz_acr_name} --query loginServer --output tsv --only-show-errors)
+  docker tag lzfront:latest "$registryEndPoint/lzfront:latest"
 
   echo "INFO: Logging into Container Registry"
   az acr login --name "${mlz_acr_name}"
 
-  ACR_REGISTRY_ID=$(az acr show --name "${mlz_acr_name}" --query id --output tsv)
+  ACR_REGISTRY_ID=$(az acr show --name "${mlz_acr_name}" --query id --output tsv --only-show-errors)
   az role assignment create --assignee "$(az keyvault secret show --name "${mlz_sp_kv_name}" --vault-name "${mlz_kv_name}" --query value --output tsv)" --scope "${ACR_REGISTRY_ID}" --role acrpull
 
   echo "INFO: pushing docker container"
-  docker tag lzfront:latest "${mlz_acr_name}".azurecr.io/lzfront:latest
-  docker push "${mlz_acr_name}".azurecr.io/lzfront:latest
-  ACR_LOGIN_SERVER=$(az acr show --name "${mlz_acr_name}" --resource-group "${mlz_rg_name}" --query "loginServer" --output tsv)
+  docker tag lzfront:latest "$registryEndPoint/lzfront:latest"
+  docker push "$registryEndPoint"/lzfront:latest
+  ACR_LOGIN_SERVER=$(az acr show-endpoints --name ${mlz_acr_name} --query loginServer --output tsv --only-show-errors)
 
   echo "INFO: creating instance"
   fqdn=$(az container create \
