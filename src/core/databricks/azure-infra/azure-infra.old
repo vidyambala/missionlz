@@ -1,0 +1,56 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#################################
+# Databricks  Configuration
+#################################
+
+names_prefix				= "shnawa-db99"
+#deploymentname 				= "shanwa-db99-deploy"
+databricks_subid    			= "6e3f6fcf-bfee-4800-881b-ea50e5644940"
+
+#################################
+# Network configuration section
+#################################
+
+databricks_vnet_address_space 		= ["10.0.0.0/16"]
+databricks_private_subnet_address_space = ["10.0.19.0/24"]
+
+subnets 				= {
+  "shnawa99-databricks-snet" 	= { 
+    name              			= "shnawa99_databricks_snet"
+    address_prefixes  			= ["10.0.0.0/24"]
+    service_endpoints 			= ["Microsoft.Storage"]
+
+    enforce_private_link_endpoint_network_policies 	= false
+    enforce_private_link_service_network_policies 	= false
+
+    nsg_name 				=  "shnawa99_databricks_nsg"
+    nsg_rules 				= {
+      "allow_ssh" 			= {
+        name                       	= "allow_ssh"
+        priority                   	= "100"
+        direction                  	= "Inbound"
+        access                     	= "Allow"
+        protocol                   	= "Tcp"
+        source_port_range          	= ""
+        destination_port_range     	= "22"
+        source_address_prefix      	= "*"
+        destination_address_prefix 	= ""
+      }
+      "allow_rdp" 			= {
+        name                       	= "allow_rdp"
+        priority                   	= "200"
+        direction                  	= "Inbound"
+        access                     	= "Allow"
+        protocol                   	= "Tcp"
+        source_port_range          	= ""
+        destination_port_range     	= "3389"
+        source_address_prefix      	= "*"
+        destination_address_prefix 	= ""
+      }
+    }
+
+    routetable_name 			= "shnawa99_databricks_route"
+  }
+}
+                         

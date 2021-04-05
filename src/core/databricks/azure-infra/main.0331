@@ -1,0 +1,54 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+terraform {
+  backend "azurerm" {}
+}
+
+provider "azurerm" {
+  version         = "~> 2.50.0"
+  environment     = var.tf_environment
+  metadata_host   = var.mlz_metadatahost
+  tenant_id       = var.mlz_tenantid
+  subscription_id = var.databricks_subid
+  client_id       = var.mlz_clientid
+  client_secret   = var.mlz_clientsecret
+
+  features {}
+}
+
+module "virtual-network" {
+  source                                                = "../../../modules/databricks/azure-infra/virtual-network"
+  name_prefix                                           = var.name_prefix
+  mlz_location                            		= var.mlz_location
+  databricks_vnet_address_space                         = var.databricks_vnet_address_space
+
+}
+
+module "subnet" {
+  source                                                = "../../../modules/databricks/azure-infra/subnet"
+  name_prefix                                           = var.name_prefix
+  mlz_location                             		= var.mlz_location
+  databricks_resource_group_name			= module.virtual-network.databricks_resource_group_name
+  databricks_virtual_network_name			= module.virtual-network.databricks_virtual_network_name
+  databricks_vnet_address_space				= var.databricks_vnet_address_space
+}
+
+module "network-security-group" {
+  source                                                = "../../../modules/databricks/azure-infra/network-security-group"
+  name_prefix                                           = var.name_prefix
+  mlz_location                             	 	= var.mlz_location
+  databricks_resource_group_name                        = module.virtual-network.databricks_resource_group_name
+}
+
+module "network-security-group-subnet-association" {
+  source                                                = "../../../modules/databricks/azure-infra/network-security-group-subnet-association"
+  databricks_private_subnet_id				= module.subnet.databricks_private_subnet_id
+  databricks_private_nsg_id				= module.network-security-group.databricks_private_nsg_id
+}
+
+module "databricks-workspace" {
+  source                                                = "../../../modules/databricks/azure-infra/databricks-workspace"
+  name_prefix                                           = var.name_prefix
+  mlz_location			                        = var.mlz_location
+  databricks_resource_group_name                        = module.virtual-network.databricks_resource_group_name
+}
