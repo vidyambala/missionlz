@@ -45,6 +45,11 @@ cd src/scripts
   --location usgovvirginia \
   --tf-environment usgovernment
 ```
+# **I GET /bin/bash^M: bad interpreter: No such file or directory - Convert DOS line endings to Linux line endings for all related .sh files - :set ff=unix in VIM or CRLF to LF in VSCode**
+
+# ** After UI Deployment what are the next Steps to perform in Web UI?**
+
+
 
 `setup_ezdeploy.sh` has more configurable options, but these are the minimum required to deploy a running UI that will help you make a full MLZ deployment.
 
@@ -189,3 +194,5 @@ prior to following the following instructions
     ```
 
 You can then access the application by pointing your browser at "localhost".
+
+
