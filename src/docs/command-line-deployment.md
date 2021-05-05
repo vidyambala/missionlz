@@ -20,6 +20,8 @@
 
 Interested in just getting started and seeing what this does? Login to Azure CLI and try this command to deploy Mission LZ with some default configuration:
 
+# **** I GET /bin/bash^M: bad interpreter: No such file or directory - Convert DOS line endings to Linux line endings for all related .sh files - :set ff=unix in VIM or CRLF to LF in VSCode ****
+
 ```bash
 src/deploy.sh -s {your_subscription_id}
 ```
