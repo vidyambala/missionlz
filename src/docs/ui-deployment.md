@@ -45,9 +45,9 @@ cd src/scripts
   --location usgovvirginia \
   --tf-environment usgovernment
 ```
-# **I GET /bin/bash^M: bad interpreter: No such file or directory - Convert DOS line endings to Linux line endings for all related .sh files - :set ff=unix in VIM or CRLF to LF in VSCode**
+# **** I GET /bin/bash^M: bad interpreter: No such file or directory - Convert DOS line endings to Linux line endings for all related .sh files - :set ff=unix in VIM or CRLF to LF in VSCode ****
 
-# ** After UI Deployment what are the next Steps to perform in Web UI?**
+# **** After UI Deployment what are the next Steps to perform in Web UI? When I try to EXECUTE TERRAFORM with defaults the window seems to hang and nothing is created. ****
 
 
 
@@ -79,7 +79,7 @@ This process closely mirrors the standard Azure documentation with a few subtle 
 On your internet connected staging machine (With Docker Installed):
 
 Build the docker image needed for deployment:
-
+# **** Install ZIP package as prerequisites for this step. sudo apt-get install zip ****
 ```BASH
 cd src/scripts
 ./export_docker.sh
@@ -106,6 +106,7 @@ Running the user interface on your local workstation is not our recommended appr
 ### Install Python
 
 Basic Installation Instructions for Ubuntu 20.04.   You may need to find different instructions for other flavors of Linux.
+# **** Need python3-venv package - sudo apt-get install python3-venv ****
 
 ```BASH
 apt-get update \
@@ -147,6 +148,11 @@ prior to following the following instructions
 
     `port`:  Default is 80, if you are running in WSL or otherwise can't bind to 80, use this flag to enter a port (e.g. 8081)
 
+
+# **** Attempts to use eastus for location and public as environment by default - Must use the following switches for MAG --location usgovvirginia and --tf-environment usgovernment **** 
+
+# **** Got the following error when running this: INFO: creating app registration mlz-frontend-app-mlz1620214588 to facilitate user logon at localhost:80...; INFO: sourcing app registration information for app ID fc5575b5-cf98-4b9b-a0a8-8b16bc03295d...; ERROR: Resource 'fc5575b5-cf98-4b9b-a0a8-8b16bc03295d' does not exist or one of its queried reference-property objects are not present. ****
+
     ```bash
     cd src/scripts
     ./setup_ezdeploy.sh -d local -s <subscription_id> -p <port>
@@ -187,6 +193,11 @@ prior to following the following instructions
     ```
 
 1. Execute web server
+
+# **** Even though last step didn't work I set the above env variables ****
+# **** Had to install the following pip prereq modules: pip install dominate; pip install uvicorn; pip install azure.identity; pip install azure.keyvault; pip install fastapi; aiofiles *****
+# **** Got the following error when running against MAG: (pyenv) john@MININT-TRHLKU2:/mnt/c/git/missionlz/src/front$ python3 main.py; Traceback (most recent call last):  File "main.py", line 33, in <module>;     subprocess.check_call(["az", "cloud", "set", "-n", cloud_name]);  File "/usr/lib/python3.8/subprocess.py", line 359, in check_call;    retcode = call(*popenargs, **kwargs);   File "/usr/lib/python3.8/subprocess.py", line 340, in call;     with Popen(*popenargs, **kwargs) as p:  File "/usr/lib/python3.8/subprocess.py", line 854, in __init__;     self._execute_child(args, executable, preexec_fn, close_fds,  File "/usr/lib/python3.8/subprocess.py", line 1637, in _execute_child;    self.pid = _posixsubprocess.fork_exec(; TypeError: expected str, bytes or os.PathLike object, not NoneType ****
+
 
     ```bash
     cd src/front
