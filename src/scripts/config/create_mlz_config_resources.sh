@@ -114,41 +114,53 @@ wait_for_sp_property() {
 
 # Create Azure AD application registration and Service Principal
 # TODO: Lift the subscription scoping out of here and move into conditional
-echo "INFO: verifying service principal ${mlz_sp_name} is unique..."
-if [[ -z $(az ad sp list --filter "displayName eq 'http://${mlz_sp_name}'" --query "[].displayName" -o tsv) ]];then
-    echo "INFO: creating service principal ${mlz_sp_name}..."
-    sp_creds=($(az ad sp create-for-rbac \
-        --name "http://${mlz_sp_name}" \
-        --skip-assignment true \
-        --query "[password, appId]" \
-        --only-show-errors \
-        --output tsv))
+if [[ -z ${env_service_prin} ]]; then 
+    echo "INFO: verifying service principal ${mlz_sp_name} is unique..."
+    if [[ -z $(az ad sp list --filter "displayName eq 'http://${mlz_sp_name}'" --query "[].displayName" -o tsv) ]];then
+        echo "INFO: creating service principal ${mlz_sp_name}..."
+        sp_creds=($(az ad sp create-for-rbac \
+            --name "http://${mlz_sp_name}" \
+            --skip-assignment true \
+            --query "[password, appId]" \
+            --only-show-errors \
+            --output tsv))
 
-    sp_client_secret=${sp_creds[0]}
-    sp_client_id=${sp_creds[1]}
+        sp_client_secret=${sp_creds[0]}
+        sp_client_id=${sp_creds[1]}
 
-    wait_for_sp_creation "${sp_client_id}"
-    wait_for_sp_property "${sp_client_id}" "objectId"
+        wait_for_sp_creation "${sp_client_id}"
+        wait_for_sp_property "${sp_client_id}" "objectId"
 
-    odata_filter_args=(--filter "\"appId eq '$sp_client_id'\"" --query "[0].objectId" --output tsv)
-    object_id_query="az ad sp list ${odata_filter_args[*]}"
+        odata_filter_args=(--filter "\"appId eq '$sp_client_id'\"" --query "[0].objectId" --output tsv)
+        object_id_query="az ad sp list ${odata_filter_args[*]}"
 
-    sp_object_id=$(eval "$object_id_query")
+        sp_object_id=$(eval "$object_id_query")
 
-    # Assign Contributor role to Service Principal
-    for sub in "${subs[@]}"
-    do
-    echo "INFO: setting Contributor role assignment for ${mlz_sp_name} on subscription ${sub}..."
-    az role assignment create \
-        --role Contributor \
-        --assignee-object-id "${sp_object_id}" \
-        --scope "/subscriptions/${sub}" \
-        --assignee-principal-type ServicePrincipal \
-        --output none
-    done
+        # Assign Contributor role to Service Principal
+        for sub in "${subs[@]}"
+        do
+        echo "INFO: setting Contributor role assignment for ${mlz_sp_name} on subscription ${sub}..."
+        az role assignment create \
+            --role Contributor \
+            --assignee-object-id "${sp_object_id}" \
+            --scope "/subscriptions/${sub}" \
+            --assignee-principal-type ServicePrincipal \
+            --output none
+        done
+    else
+        error_log "ERROR: A service principal named ${mlz_sp_name} already exists. This must be a unique service principal for your use only. Try again with a new mlz-env-name. Exiting script."
+        exit 1
+    fi
 else
-    error_log "ERROR: A service principal named ${mlz_sp_name} already exists. This must be a unique service principal for your use only. Try again with a new mlz-env-name. Exiting script."
-    exit 1
+        sp_client_secret=${env_service_prin}
+        sp_client_id=${env_service_prin_secret}
+        # login with known credentials
+        az login --service-principal \
+        --user "${sp_client_id}" \
+        --password="${sp_client_secret}" \
+        --tenant "$(az account show --query "tenantId" --output tsv)" \
+        --allow-no-subscriptions \
+        --output json
 fi
 
 # Validate or create Terraform Config resource group
