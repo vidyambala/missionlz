@@ -154,13 +154,6 @@ if [[ -z ${env_service_prin} ]]; then
 else
         sp_client_secret=${env_service_prin}
         sp_client_id=${env_service_prin_secret}
-        # login with known credentials
-        az login --service-principal \
-        --user "${sp_client_id}" \
-        --password="${sp_client_secret}" \
-        --tenant "$(az account show --query "tenantId" --output tsv)" \
-        --allow-no-subscriptions \
-        --output json
 fi
 
 # Validate or create Terraform Config resource group
