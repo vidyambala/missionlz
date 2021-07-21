@@ -154,6 +154,10 @@ if [[ -z ${env_service_prin} ]]; then
 else
         sp_client_secret=${env_service_prin}
         sp_client_id=${env_service_prin_secret}
+        odata_filter_args=(--filter "\"appId eq '$sp_client_id'\"" --query "[0].objectId" --output tsv)
+        object_id_query="az ad sp list ${odata_filter_args[*]}"
+
+        sp_object_id=$(eval "$object_id_query")
 fi
 
 # Validate or create Terraform Config resource group
