@@ -152,8 +152,8 @@ if [[ -z ${env_service_prin} ]]; then
         exit 1
     fi
 else
-        sp_client_secret=${env_service_prin}
-        sp_client_id=${env_service_prin_secret}
+        sp_client_secret=${env_service_prin_secret}
+        sp_client_id=${env_service_prin}
         odata_filter_args=(--filter "\"appId eq '$sp_client_id'\"" --query "[0].objectId" --output tsv)
         object_id_query="az ad sp list ${odata_filter_args[*]}"
 
