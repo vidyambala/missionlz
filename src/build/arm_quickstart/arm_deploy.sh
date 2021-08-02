@@ -21,6 +21,7 @@ rm terraform.zip
 
 # Check out the MLZ Repo
 git clone --quiet https://github.com/Azure/missionlz.git
+git checkout glennmusa/armdispatch
 cd ./missionlz/src/scripts
 
 # Assemble argument list
