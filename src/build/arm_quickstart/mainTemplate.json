@@ -114,7 +114,7 @@
               "value": "[parameters('no_sentinel')]"
             }
           ],
-          "primaryScriptUri": "https://raw.githubusercontent.com/Azure/missionlz/main/src/build/arm_quickstart/arm_deploy.sh",
+          "primaryScriptUri": "https://raw.githubusercontent.com/Azure/missionlz/glennmusa/armdispatch/src/build/arm_quickstart/arm_deploy.sh",
           "cleanupPreference": "OnExpiration",
           "retentionInterval": "P1D"
         }
