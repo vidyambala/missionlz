@@ -1,4 +1,5 @@
 targetScope = 'subscription'
+password ='test'
 
 @minLength(3)
 @maxLength(24)
