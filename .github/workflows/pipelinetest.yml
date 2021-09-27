@@ -19,4 +19,4 @@ jobs:
           with:
             azure-devops-project-url: https://vidbala.visualstudio.com/TestProject
             azure-pipeline-name: 'vidyambala.missionlz'
-            azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
+            azure-devops-token: ${secrets.AZURE_DEVOPS_TOKEN}
