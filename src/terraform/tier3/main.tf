@@ -1,23 +1,30 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 terraform {
-  backend "azurerm" {}
-  required_version = ">= 1.0.3"
+  # It is recommended to use remote state instead of local
+  # If you are using Terraform Cloud, You can update these values in order to configure your remote state.
+  /*  backend "remote" {
+    organization = "{{ORGANIZATION_NAME}}"
+    workspaces {
+      name = "{{WORKSPACE_NAME}}"
+    }
+  }
+  */
+  backend "local" {}
+
+  required_version = ">= 1.0.11"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "= 2.71.0"
+      version = "= 2.90.0"
     }
   }
 }
 
 provider "azurerm" {
-  environment     = var.tf_environment
-  metadata_host   = var.mlz_metadatahost
-  tenant_id       = var.mlz_tenantid
+  environment     = var.environment
+  metadata_host   = var.metadata_host
   subscription_id = var.hub_subid
-  client_id       = var.mlz_clientid
-  client_secret   = var.mlz_clientsecret
 
   features {
     log_analytics_workspace {
@@ -31,12 +38,9 @@ provider "azurerm" {
 
 provider "azurerm" {
   alias           = "hub"
-  environment     = var.tf_environment
-  metadata_host   = var.mlz_metadatahost
-  tenant_id       = var.mlz_tenantid
+  environment     = var.environment
+  metadata_host   = var.metadata_host
   subscription_id = var.hub_subid
-  client_id       = var.mlz_clientid
-  client_secret   = var.mlz_clientsecret
 
   features {
     log_analytics_workspace {
@@ -50,12 +54,9 @@ provider "azurerm" {
 
 provider "azurerm" {
   alias           = "tier1"
-  environment     = var.tf_environment
-  metadata_host   = var.mlz_metadatahost
-  tenant_id       = var.mlz_tenantid
+  environment     = var.environment
+  metadata_host   = var.metadata_host
   subscription_id = var.tier1_subid
-  client_id       = var.mlz_clientid
-  client_secret   = var.mlz_clientsecret
 
   features {
     log_analytics_workspace {
@@ -69,12 +70,9 @@ provider "azurerm" {
 
 provider "azurerm" {
   alias           = "tier3"
-  environment     = var.tf_environment
-  metadata_host   = var.mlz_metadatahost
-  tenant_id       = var.mlz_tenantid
+  environment     = var.environment
+  metadata_host   = var.metadata_host
   subscription_id = var.tier3_subid
-  client_id       = var.mlz_clientid
-  client_secret   = var.mlz_clientsecret
 
   features {
     log_analytics_workspace {
@@ -93,12 +91,9 @@ provider "azurerm" {
 resource "azurerm_resource_group" "tier3" {
   provider = azurerm.tier3
 
-  location = var.mlz_location
+  location = var.location
   name     = var.tier3_rgname
-
-  tags = {
-    DeploymentName = var.deploymentname
-  }
+  tags     = var.tags
 }
 
 ################################
@@ -108,8 +103,8 @@ resource "azurerm_resource_group" "tier3" {
 data "azurerm_log_analytics_workspace" "laws" {
   provider = azurerm.tier1
 
-  name                = var.laws_name.value
-  resource_group_name = var.laws_rgname.value
+  name                = var.laws_name
+  resource_group_name = var.laws_rgname
 }
 
 ################################
@@ -121,7 +116,6 @@ data "azurerm_virtual_network" "hub" {
   resource_group_name = var.hub_rgname
 }
 
-
 module "spoke-network-t3" {
   providers  = { azurerm = azurerm.tier3 }
   depends_on = [azurerm_resource_group.tier3]
@@ -129,9 +123,9 @@ module "spoke-network-t3" {
 
   location = azurerm_resource_group.tier3.location
 
-  firewall_private_ip = var.firewall_private_ip.value
+  firewall_private_ip = var.firewall_private_ip
 
-  laws_location     = var.mlz_location
+  laws_location     = var.location
   laws_workspace_id = data.azurerm_log_analytics_workspace.laws.workspace_id
   laws_resource_id  = data.azurerm_log_analytics_workspace.laws.id
 
@@ -139,10 +133,7 @@ module "spoke-network-t3" {
   spoke_vnetname           = var.tier3_vnetname
   spoke_vnet_address_space = var.tier3_vnet_address_space
   subnets                  = var.tier3_subnets
-
-  tags = {
-    DeploymentName = var.deploymentname
-  }
+  tags                     = var.tags
 }
 
 resource "azurerm_virtual_network_peering" "t3-to-hub" {

@@ -6,15 +6,18 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Terraform, providers and tflint versions
-ARG TERRAFORM_VERSION=1.0.4
-ARG AZURERM_VERSION=2.71.0
+ARG TERRAFORM_VERSION=1.1.2
+ARG AZURERM_VERSION=2.90.0
 ARG RANDOM_VERSION=3.1.0
 ARG TIME_VERSION=0.7.2
-ARG TFLINT_VERSION=0.30.0
-ARG TFLINT_AZURERM=0.11.0
+ARG TFLINT_VERSION=0.34.0
+ARG TFLINT_AZURERM=0.14.0
 
 # Azure CLI version
-ARG AZURE_CLI_VERSION=2.27.0-1~focal
+ARG AZURE_CLI_VERSION=2.31.0-1~focal
+
+# Bicep version
+ARG BICEP_VERSION=v0.4.1272
 
 # Update distro (software-properties-common installs the add-apt-repository command)
 RUN apt-get update \
@@ -34,13 +37,6 @@ RUN add-apt-repository ppa:git-core/ppa \
     gnupg \
     sudo \
     shellcheck
-
-# Install Python 3
-RUN apt-get update \
-    && apt-get install -y \
-    python3 \
-    python3-pip \
-    && ln -s /usr/bin/python3 /usr/bin/python 
 
 # Install Terraform and tflint
 RUN wget -O terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
@@ -94,6 +90,10 @@ RUN AZ_REPO=$(lsb_release -cs) \
 
 # Install AZ CLI
 RUN apt-get update && apt-get install -y azure-cli=${AZURE_CLI_VERSION}
+
+# Install Bicep
+RUN curl -Lo /usr/local/bin/bicep https://github.com/Azure/bicep/releases/download/${BICEP_VERSION}/bicep-linux-x64 \
+    && chmod +x /usr/local/bin/bicep
 
 # Clean up
 RUN apt-get autoremove -y \

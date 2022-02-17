@@ -23,7 +23,11 @@ Third-party code must include the associated license in the [`NOTICE`](NOTICE) f
 
 ### Summary
 
-We follow a [Kanban](https://en.wikipedia.org/wiki/Kanban_(development)) process. A product owner is responsible defining and prioritizing work in the product backlog. Each item in the backlog is a self-contained piece of work, finished to production quality and merged to the main branch. Releases are monthly and prioritization is set within releases. New priorities come from our stakeholders and from information we gather while doing the technical work.
+We follow a [Kanban](https://en.wikipedia.org/wiki/Kanban_(development)) process.
+
+- A product owner is responsible defining and prioritizing work in the product backlog.
+- Each item in the backlog is a self-contained piece of work, finished to production quality and merged to the main branch.
+- Releases are monthly and prioritization is set within releases. New priorities come from our stakeholders and from information we gather while doing the technical work.
 
 ### Why Kanban
 
@@ -51,8 +55,8 @@ These roles demonstrate how we think about doing the work. A single person can o
 
 ### Artifacts
 
-- Product backlog: The product backlog is defined using GitHub issues. Issue templates are in the repo for Issues (new development) and bugs. Backlog items (issues and bugs) are grouped into releases and prioritized within each release. See the [product owner process](#product-owner-process) for more details.
-- Monthly releases: Each release is defined using a GitHub project. One release is finished each month. We plan major themes for each release, but the actual content of a finished release depends on what is accomplished using our Kanban process.
+- Product backlog: The product backlog is defined using GitHub issues. [Issue templates](.github/ISSUE_TEMPLATE) are in the repo for [backlog items (new development) and bugs](https://github.com/Azure/missionlz/issues/new/choose). Issues are grouped into releases and prioritized within each release. See the [product owner process](#product-owner-process) for more details.
+- Monthly releases: Each release is defined using a GitHub project. GitHub projects are visible on the [Projects](https://github.com/Azure/missionlz/projects) tab of the GitHub site. One release is finished each month. We plan major themes for each release, but the actual content of a finished release depends on what is accomplished using our Kanban process.
 - Software increment: Each change to the software is implemented as a git commit to the main branch. GitHub pull requests are used to define and review each commit to main as a squashed merge (all changes combined into a single commit.) See the [development process](#development-process) for more details.
 
 ### Events
@@ -64,9 +68,9 @@ These roles demonstrate how we think about doing the work. A single person can o
 
 ### Development Process
 
-#### Select an Issue
+#### Select a Backlog Item
 
-Team members select issues to develop. More than one member can work on a single issue, and pair programming and other collaboration is encouraged. Generally, issues that have higher priority should be done before lower priority issues, but any issue may be selected from the backlog by any team member.
+Team members select backlog items or bugs to develop. More than one member can work on a single issue, and pair programming and other collaboration is encouraged. Generally, issues that have higher priority should be done before lower priority issues, but any issue may be selected from the backlog by any team member.
 
 #### Create a Branch
 
@@ -86,36 +90,63 @@ Multiple PRs can be created for an issue, but there is usually a single pull req
 
 A draft PR can be used to request feedback from the team.
 
+A [`CODEOWNERS`](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-on-github/about-code-owners) file defines the set of default reviewers for PRs to main.
+
 #### Review Other PRs
 
-When PRs are requested, review each change and run full test deployment, specifically focused on the areas that have changed. Provide comments and feedback directly related to the PR.
+When PRs are requested, review each change and run a full test deployment, specifically focused on the areas that have changed. Provide comments and feedback directly related to the PR.
 
 #### Ensure Quality
 
 The main branch is always production quality. The PR reviewer is responsible for ensuring that code merged to main meets our quality standards.
 
+#### Collaborate
+
+Team members are encouraged to collaborate, pair program, and ask for assistance.
+
+The ideal backlog item takes no more than a day or two to finish. There will be some backlog items for which we made false assumptions about the underlying technology, the platform doesn't work the way we think it does, the acceptance criteria are wrong, or for some other reason the work takes much longer than a day or two. In those cases all team members are encouraged and should feel empowered to:
+
+- Ask teammates for help
+- Modify the acceptance criteria to align with reality
+- Reduce scope
+- Split a single backlog item into multiple
+- Abandon the work and close the backlog item or put it back into the backlog
+
+If an individual backlog item takes more than a week then it's time to ask for help and consider one of the options above. Asking for help is a sign of engineering strength and expertise, and being stuck is a common experience for cloud engineers.
+
+Anyone can modify the backlog items, and when needed the product owner can assist by reducing scope, improving acceptance criteria, and splitting a single backlog item into multiple. Teammates can assist by providing advice, pair programming, or taking on part of the work.
+
+#### Nightly Builds
+
+[Nightly builds](https://github.com/Azure/missionlz#nightly-build-status) are run in Azure Pipelines to test deployments into Azure subscriptions. Successful nightly builds are a top priority for the team.
+
+How to remediate a broken build:
+
+1. One team member volunteers to investigate and fix, and communicates that to the rest of the team.
+1. Verify that the break is not an ephemeral issue. If running the build again fixes the issue then investigation can stop. If the same ephemeral issue appears often then [create a bug](https://github.com/Azure/missionlz/issues/new/choose) in the backlog and open a support request.
+1. If the issue requires a code change, [create a bug](https://github.com/Azure/missionlz/issues/new/choose) and put the bug at the top of the "In Progress" column of the [current project](https://github.com/Azure/missionlz/projects).
+1. Immediately fix the issue and submit a PR. Recruit help from the rest of the team if necessary.
+
+> NOTE: Broken nightly builds are the top priority for the team. One person will own the remediation, but the rest of the team should rally to assist until the build is fixed.
+
 ### Product Owner Process
 
 #### Product Backlog
 
-The backlog is defined in the form of GitHub issues, including bugs and regular issues. Any team member or external stakeholder can author a backlog item. The product owner is responsible for ensuring that all backlog items in a release meet the standards of being ready for development. The standards include:
+The backlog is defined in the form of GitHub issues, including bugs and backlog items. Any team member or external stakeholder can author a backlog item. The product owner is responsible for ensuring that all backlog items in a release meet the standards of being ready for development. The standards include:
 
 - A clear title
-- A concise benefit/result/outcome that defines the benefit someone would receive when the issue is completed.
+- A concise benefit/result/outcome that defines the benefit someone would receive when the issue is completed
 - An optional tag that defines who will benefit from the issue being completed
-- A detailed description that contains more context and may contain implementation details.
-- A full list of acceptance criteria that clearly define when the issue is complete.
-- Scope that is as small as possible and is also a complete and useful new feature for a stakeholder.
+- A detailed description that contains more context and may contain implementation details
+- A full list of acceptance criteria that clearly define when the issue is complete
+- Scope that is as small as possible and is also a complete and useful new feature for a stakeholder
 
 #### Triage
 
 The product owner is responsible for ensuring that each issue is fully triaged and is either closed or added to a release backlog. Triage with the team primarily happens at the weekly planning meeting and can also happen via GitHub as comments within an issue.
 
-When new issues are added to the GitHub issues list, the product owner makes sure that a `needs triage` label is added so that the issue will be discussed in the next planning meeting.
-
-#### Release Definition
-
-The product owner defines the releases in the form of GitHub projects. One release is defined per month. Each release has one or more themes. The themes are reviewed and agreed upon by the team during the weekly planning meeting.
+When new issues are added to the GitHub issues list, the product owner ensures that a `needs triage` label is added so that the issue will be discussed in the next planning meeting.
 
 #### Weekly Planning Meeting
 
@@ -128,10 +159,27 @@ The product owner sets the agenda for the meeting. The agenda includes:
 
 #### Backlog Prioritization
 
-The product owner is responsible for ensuring that the backlog items are prioritized within each release. Setting priority is a collaborative effort by the team. Priority is defined by the stack rank order of the "To do" column in a release.
+The product owner is responsible for ensuring that the backlog items are prioritized within each release. Setting priority is a collaborative effort by the team and usually happens during the weekly planning meeting. Priority is defined by the stack rank order of the "To do" column in a release.
 
 #### Architecture
 
 The product owner is responsible for ensuring that enough architecture documentation exists for the development team and stakeholders. Developing the architecture is a collaborative effort with the rest of the team. Any team member may contribute to the architecture, and some issues may be added to the backlog for discovery and testing in order to determine the elements of the architecture.
+
+### Releases
+
+#### Release Definition
+
+The product owner defines the releases in the form of GitHub projects. One release is defined per month. Each release has one or more themes. The themes are reviewed and agreed upon by the team during the weekly planning meeting.
+
+#### Creating a Release
+
+1. On the [Releases](https://github.com/Azure/missionlz/releases) page, click the button titled "Draft a new release".
+1. Click "Choose a tag", and type in a new tag name using the naming convention of "v\<year\>.\<month\>.\<revision\>". For example, `v2021.09.0`. (If this is an interim release, like a bug fix release, use the previous build label and add a revision number, like `v2021.09.1`.)
+1. Click the "+ Create new tag" button.
+1. Provide a title using this naming convention: "MLZ - \<build tag\>". For example, "MLZ - v2021.09.0".
+1. Click the button to auto-generate release notes, which will populate the description box with the titles of all pull requests merged to main.
+1. Edit the release notes for consistency, e.g., normalizing verb tense and capitalization.
+1. Add a summary description at the top of the release notes.
+1. Click the "Save draft" button to generate a draft release, or click "Publish release" if you are ready to publish.
 
 **Thank You!** - Your contributions to open source, large or small, make projects like this possible. Thank you for taking the time to contribute.

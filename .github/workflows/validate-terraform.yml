@@ -1,15 +1,21 @@
+---
+
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
 name: validate-terraform
-on: [pull_request, workflow_dispatch]
+on:
+  pull_request:
+    branches: [main]
+    paths:
+    - 'src/terraform/**'
+    - '!src/terraform/**.md'
+  workflow_dispatch:
 jobs:
   validate-terraform:
     runs-on: ubuntu-latest
     steps:
     - uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 0.13.4
     - shell: bash
       name: check tooling versions
       run: |
@@ -18,4 +24,4 @@ jobs:
     - shell: bash
       name: validate and lint terraform
       run: |
-        src/build/validate_tf.sh
+        .github/workflows/validate-terraform.sh src/terraform/mlz src/terraform/tier3
